@@ -926,5 +926,4 @@ After completing **Step 08 – Package Management**, you can now:
 - Understand package dependencies.
 - Inspect installed package files with `dpkg`.
 - Identify which package owns a specific file.
-- Follow the complete Linux package management workflow used in professional Ubuntu systems.
-```
+
