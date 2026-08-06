@@ -671,28 +671,4 @@ Status:
 COMPLETED ✅
 ```
 
----
 
-# Next Step
-
-```
-Step 12
-
-Linux Package Management
-```
-
-Topics include:
-
-- apt
-- apt-cache
-- dpkg
-- snap
-- repositories
-- package search
-- install
-- remove
-- purge
-- update
-- upgrade
-- autoremove
-- package information
