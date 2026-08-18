@@ -1,16 +1,14 @@
-```markdown
 # Step 26 — Terraform
-## Part 1 — Fundamentals
+
+## Part 1 — Fundamentals & Core Concepts
 
 ---
 
 ## 1. Objective
 
-Step 26 focuses on **Terraform** as an Infrastructure as Code (IaC) tool.
+Terraform is an Infrastructure as Code (IaC) tool used to define, provision, and manage infrastructure through configuration files.
 
-The main objective is to understand how infrastructure can be defined and managed through configuration instead of being created and modified manually.
-
-This step covers the fundamental Terraform workflow:
+The main objective of this step is to understand and practically use the Terraform workflow:
 
     Terraform Configuration
             ↓
@@ -24,56 +22,35 @@ This step covers the fundamental Terraform workflow:
             ↓
     Infrastructure
             ↓
-    Terraform State
-            ↓
-    Drift Detection / Reconciliation
+    Verify
             ↓
     terraform destroy
 
-The goal is not to memorize Terraform commands, but to understand how Terraform compares desired infrastructure with actual infrastructure and manages the difference.
+This step focuses on the Terraform fundamentals required for infrastructure management without introducing unnecessary advanced Terraform topics.
 
 ---
 
 ## 2. Environment
 
-### Operating System
+| Component | Environment |
+|---|---|
+| OS | Ubuntu Linux |
+| Architecture | linux_amd64 |
+| Terraform | v1.15.8 |
+| Docker | 29.7.2 |
+| Docker Engine | 29.7.2 |
+| Terraform Provider | kreuzwerker/docker |
+| Practice Type | Phase 2 Supplementary Lab |
+| Practice Path | `/home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/` |
+| Documentation Path | `/home/afroza/Projects/devops-learning/Step-26-Terraform/` |
 
-    Ubuntu Linux
+The Terraform lab was performed separately from the main MERN project.
 
-### Architecture
+Main MERN project:
 
-    linux_amd64
+    /home/afroza/Projects/mern-devops-practice/Blog-App-using-MERN-stack
 
-### Terraform
-
-    Terraform v1.15.8
-
-Terraform was verified successfully using:
-
-    terraform version
-
-### Docker
-
-    Docker version 29.7.2
-    Docker Engine 29.7.2
-
-Docker was used as the local infrastructure platform for the Terraform practical lab.
-
-### Practice Path
-
-    /home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/
-
-### Documentation Path
-
-    /home/afroza/Projects/devops-learning/Step-26-Terraform/
-
-### Phase
-
-Step 26 is part of **Phase 2 — Supplementary Labs**.
-
-Terraform practice was kept separate from the Phase 1 MERN project.
-
-The main MERN project was not modified during this step.
+The main MERN project was not modified for the Terraform lab.
 
 ---
 
@@ -81,1183 +58,315 @@ The main MERN project was not modified during this step.
 
 ### 3.1 Infrastructure as Code
 
-Infrastructure as Code (IaC) means defining infrastructure through code or configuration files instead of creating infrastructure manually through graphical interfaces or individual commands.
+Infrastructure as Code means defining infrastructure using configuration instead of creating and managing everything manually.
 
-Traditional approach:
+Without IaC:
 
-    Manually create infrastructure
+    Manual Configuration
             ↓
-    Configure infrastructure
+    Manual Changes
             ↓
-    Repeat the process when needed
+    Difficult to Reproduce
 
-Terraform approach:
+With IaC:
 
-    Write configuration
+    Configuration File
             ↓
-    terraform plan
+    Terraform
             ↓
-    Review changes
-            ↓
-    terraform apply
-            ↓
-    Infrastructure created/updated
+    Infrastructure
 
-This makes infrastructure more reproducible, reviewable, and manageable.
+The configuration can be reviewed, reused, and version controlled.
 
 ---
 
-### 3.2 Terraform
-
-Terraform is an Infrastructure as Code tool used to define and manage infrastructure through declarative configuration.
-
-Terraform describes the **desired state** of infrastructure.
-
-For example, the practical lab declared:
-
-    docker_image.nginx
-    docker_container.nginx
-
-Terraform then compared the configuration with the infrastructure and determined what actions were required.
-
----
-
-### 3.3 Declarative Configuration
+### 3.2 Declarative Configuration
 
 Terraform uses a declarative approach.
 
-Instead of describing every individual action step-by-step, the configuration describes the desired end state.
+Instead of describing every individual command required to create infrastructure, we describe the desired state.
 
-Example:
+For example:
 
     resource "docker_container" "nginx" {
-      name  = var.container_name
-      image = docker_image.nginx.image_id
+        name = "terraform-nginx"
     }
 
-The configuration describes what the container should look like.
+This describes what should exist.
 
-Terraform determines how to reach that desired state.
-
-### Declarative vs Imperative
+Terraform determines the actions required to reach that desired state.
 
 | Declarative | Imperative |
 |---|---|
-| Describes desired result | Describes exact steps |
-| Terraform uses this model | Shell scripts commonly use this model |
-| Terraform determines required changes | User/program specifies the sequence |
-| Focuses on final state | Focuses on actions |
+| Describe desired state | Describe exact steps |
+| Terraform | Shell scripts are a common example |
+| Terraform determines required actions | User defines the sequence of actions |
+| Focuses on what should exist | Focuses on how to create it |
 
 ---
 
-### 3.4 Provider
+### 3.3 Terraform Architecture
 
-A Terraform provider allows Terraform to communicate with an external platform, service, or API.
+The basic Terraform architecture used in this lab was:
 
-The practical lab used:
+    Terraform CLI
+          ↓
+    Terraform Configuration
+          ↓
+    Docker Provider
+          ↓
+    Docker Engine
+          ↓
+    Docker Infrastructure
 
-    kreuzwerker/docker
+The Docker provider allows Terraform to communicate with Docker.
 
-This provider allows Terraform to communicate with Docker.
+---
 
-Relationship:
+## 4. Terraform Core Components
+
+### 4.1 Terraform Configuration
+
+Terraform configuration is written in `.tf` files.
+
+Example:
+
+    main.tf
+
+The configuration describes the desired infrastructure.
+
+---
+
+### 4.2 Provider
+
+A provider allows Terraform to communicate with a specific platform or service.
+
+In this lab:
 
     Terraform
         ↓
     Docker Provider
         ↓
-    Docker Engine
+    Docker
 
-Terraform itself does not run the Nginx container directly.
+The Docker provider used was:
 
-The Docker provider translates Terraform's configuration into operations against Docker.
+    kreuzwerker/docker
 
 ---
 
-### 3.5 Resource
+### 4.3 Resource
 
 A resource represents an infrastructure object managed by Terraform.
 
-The practical lab used two resources:
+The practical lab used:
 
     docker_image.nginx
 
-and
+and:
 
     docker_container.nginx
 
-The image represents the Nginx Docker image.
-
-The container represents the running Nginx container.
-
-Relationship:
+The relationship was:
 
     docker_image.nginx
             ↓
     docker_container.nginx
 
-The container depends on the image.
+The container uses the Docker image, so Terraform can determine the dependency between them.
 
 ---
 
-### 3.6 Terraform State
+### 4.4 Variables
 
-Terraform maintains state information about the infrastructure it manages.
+Variables allow configurable values to be separated from the main resource configuration.
 
-The local practical lab created:
-
-    terraform.tfstate
-
-The state contains Terraform's recorded information about managed resources.
-
-Basic distinction:
-
-| Configuration | State |
-|---|---|
-| Describes desired infrastructure | Records managed infrastructure information |
-| Written by the user | Maintained by Terraform |
-| `.tf` files | `terraform.tfstate` |
-| Defines what should exist | Helps Terraform track what exists |
-
-Terraform uses configuration, state, and information obtained from the real infrastructure to determine required changes.
-
----
-
-### 3.7 Variables
-
-Variables provide configurable input to Terraform configuration.
-
-The practical lab used:
-
-    variable "container_name"
-
-and
-
-    variable "external_port"
-
-Instead of hard-coding values directly inside the resource, the resource used:
-
-    var.container_name
-
-and
+For example:
 
     var.external_port
 
-This makes configuration easier to modify and reuse.
+Instead of hard-coding a port directly into the resource, the value can be provided through a variable.
+
+This makes configuration easier to change and reuse.
 
 ---
 
-### 3.8 Outputs
+### 4.5 Outputs
 
-Outputs expose useful information from Terraform-managed resources.
+Outputs expose useful information from Terraform configuration and state.
 
-The practical lab defined outputs for:
+The practical lab created outputs for:
 
     container_name
 
-and
+and:
 
     container_port
 
-After applying the output configuration, Terraform displayed:
+Example output:
 
     container_name = "terraform-nginx"
     container_port = 8081
 
-Variables and outputs serve opposite purposes:
-
-| Variable | Output |
-|---|---|
-| Input to Terraform | Information returned from Terraform |
-| Customizes configuration | Exposes useful values |
-| `var.container_name` | `output "container_name"` |
-
 ---
 
-## 4. Terraform Architecture / Workflow
+### 4.6 State
 
-The practical Terraform workflow can be represented as:
+Terraform maintains state information about managed infrastructure.
 
-    Terraform Configuration
-            │
-            ├── Provider
-            ├── Resources
-            ├── Variables
-            └── Outputs
-            │
-            ↓
-    terraform init
-            │
-            ↓
-    Provider Initialization
-            │
-            ↓
-    terraform validate
-            │
-            ↓
-    Configuration Validation
-            │
-            ↓
-    terraform plan
-            │
-            ↓
-    Compare Desired State
-    with Existing Infrastructure
-            │
-            ↓
-    terraform apply
-            │
-            ↓
-    Infrastructure Changes
-            │
-            ↓
-    Terraform State
-            │
-            ↓
-    Verify Actual Infrastructure
-            │
-            ↓
-    Detect Drift When Necessary
-            │
-            ↓
-    Reconcile Infrastructure
-            │
-            ↓
-    terraform destroy
-            │
-            ↓
-    Infrastructure Removed
+The local lab used:
 
----
+    terraform.tfstate
 
-### 4.1 Core Terraform Workflow Commands
+The state allows Terraform to compare the configuration with the infrastructure it manages.
 
-| Command | Main purpose |
-|---|---|
-| `terraform init` | Initializes the Terraform working directory |
-| `terraform validate` | Checks whether configuration is valid |
-| `terraform plan` | Shows proposed infrastructure changes |
-| `terraform apply` | Applies the proposed changes |
-| `terraform destroy` | Removes Terraform-managed infrastructure |
-
-The practical lab demonstrated the complete lifecycle rather than using the commands only theoretically.
-
----
-
-### 4.2 Plan vs Apply
-
-| `terraform plan` | `terraform apply` |
-|---|---|
-| Preview changes | Perform changes |
-| Does not normally modify infrastructure | Modifies infrastructure |
-| Helps review proposed actions | Executes the configuration |
-| Example: `2 to add` | Example: `2 added` |
-
-Example from the practical lab:
-
-    Plan: 2 to add, 0 to change, 0 to destroy.
-
-After applying:
-
-    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
-
----
-
-### 4.3 Desired State vs Actual State
-
-Terraform's fundamental model can be understood as:
+Conceptually:
 
     Configuration
           ↓
     Desired State
 
-    Docker Infrastructure
+    Terraform State
           ↓
-    Actual State
+    Known Managed Infrastructure
 
-Terraform compares these states.
+    Actual Infrastructure
+          ↓
+    Real Resources
 
-If they match:
-
-    No changes. Your infrastructure matches the configuration.
-
-If they differ:
-
-    Terraform proposes changes through terraform plan.
-
-During the practical lab, changing the desired host port from `8080` to `8081` caused Terraform to detect a difference and propose a container replacement.
+Terraform uses these pieces of information to determine what changes are required.
 
 ---
 
-## 5. Important Differences
+## 5. Terraform vs Docker
 
-### 5.1 Terraform vs Docker
+| Feature | Terraform | Docker |
+|---|---|---|
+| Main purpose | Infrastructure management | Containerization |
+| Defines | Infrastructure/resources | Containers/images |
+| Configuration | Terraform `.tf` files | Dockerfile / CLI / Compose |
+| State management | Terraform state | Docker's own runtime state |
+| Example | Create/manage Docker container | Run container |
+| Main focus | Desired infrastructure state | Running containers |
 
-| Terraform | Docker |
-|---|---|
-| Infrastructure as Code tool | Container platform |
-| Defines and manages infrastructure | Builds and runs containers |
-| Uses declarative configuration | Provides container runtime |
-| Uses providers | Docker Engine directly manages containers |
-| `plan`, `apply`, `destroy` | `build`, `run`, `stop`, `rm` |
-
-In this lab they worked together:
-
-    Terraform
-        ↓
-    Docker Provider
-        ↓
-    Docker Engine
-        ↓
-    Nginx Container
+In this lab, Terraform was used to manage Docker infrastructure.
 
 ---
 
-### 5.2 Terraform vs Ansible
+## 6. Terraform vs Kubernetes
 
-| Terraform | Ansible |
-|---|---|
-| Mainly infrastructure provisioning/management | Mainly configuration management and automation |
-| Declarative infrastructure model | Primarily task-based automation |
-| Tracks infrastructure through state | Generally does not use Terraform-style state |
-| Commonly used to provision resources | Commonly used to configure existing systems |
+| Feature | Terraform | Kubernetes |
+|---|---|---|
+| Main purpose | Infrastructure provisioning/management | Container orchestration |
+| Main focus | Infrastructure | Running workloads |
+| Typical object | Resource | Pod, Deployment, Service |
+| Desired state | Infrastructure state | Application/cluster state |
+| Example | Create infrastructure | Run and scale containers |
 
-They can complement each other, but they solve different primary problems.
-
----
-
-### 5.3 Terraform vs Kubernetes
-
-| Terraform | Kubernetes |
-|---|---|
-| Infrastructure provisioning and management | Container orchestration |
-| Creates/manages infrastructure resources | Runs and manages containerized workloads |
-| Uses providers | Uses Kubernetes API |
-| `plan/apply/destroy` | Deployments, Pods, Services, etc. |
-| IaC tool | Container orchestration platform |
-
-Conceptually:
-
-    Terraform
-        ↓
-    Infrastructure
-
-    Kubernetes
-        ↓
-    Container Workloads
+Terraform and Kubernetes solve different problems and can be used together in larger DevOps environments.
 
 ---
 
-### 5.4 Terraform Configuration vs Terraform State
+## 7. Terraform vs Ansible
 
-| Configuration | State |
-|---|---|
-| Desired state | Recorded managed infrastructure |
-| Written/edited by user | Maintained by Terraform |
-| `.tf` files | `terraform.tfstate` |
-| Defines resources | Tracks resources |
-| Describes what should exist | Helps Terraform understand what it manages |
-
-The state file should not be treated as a replacement for configuration.
+| Feature | Terraform | Ansible |
+|---|---|---|
+| Main focus | Infrastructure provisioning | Configuration/automation |
+| Approach | Declarative | Primarily task-based |
+| Common use | Create infrastructure | Configure existing systems |
+| State | Maintains Terraform state | Does not use Terraform-style state |
+| Example | Create a server/network/resource | Install packages and configure services |
 
 ---
 
-### 5.5 Variable vs Output
+## 8. Core Terraform Workflow
 
-| Variable | Output |
-|---|---|
-| Provides input | Provides result/information |
-| Used to customize configuration | Used to expose useful resource values |
-| `var.external_port` | `container_port` |
-| Input direction | Output direction |
+The practical Terraform lifecycle used in this step was:
 
----
+    Write Configuration
+            ↓
+    terraform init
+            ↓
+    terraform validate
+            ↓
+    terraform plan
+            ↓
+    terraform apply
+            ↓
+    Verify Infrastructure
+            ↓
+    Modify Configuration
+            ↓
+    terraform plan
+            ↓
+    terraform apply
+            ↓
+    terraform destroy
 
-### 5.6 `plan` vs `apply` vs `destroy`
+Each stage has a different purpose.
 
 | Command | Purpose |
 |---|---|
-| `terraform plan` | Preview what Terraform intends to change |
-| `terraform apply` | Create/update infrastructure according to configuration |
-| `terraform destroy` | Remove Terraform-managed infrastructure |
+| `terraform init` | Initialize the Terraform working directory |
+| `terraform validate` | Check whether configuration is valid |
+| `terraform plan` | Preview infrastructure changes |
+| `terraform apply` | Apply the desired infrastructure |
+| `terraform output` | Display defined output values |
+| `terraform state` | Inspect/manage Terraform state |
+| `terraform destroy` | Remove managed infrastructure |
 
 ---
 
-## Part 1 Summary
+## 9. Important Concept
 
-The fundamental Terraform model established in this step is:
+Terraform does not simply execute commands one after another.
 
-    Infrastructure as Code
-            ↓
-    Declarative Configuration
-            ↓
-    Provider
-            ↓
-    Resource
-            ↓
-    Desired State
-            ↓
-    terraform plan
-            ↓
-    terraform apply
-            ↓
-    Infrastructure
-            ↓
-    Terraform State
-            ↓
-    Drift Detection / Reconciliation
-            ↓
-    terraform destroy
+Its main idea is:
 
-Terraform, Docker, and Kubernetes solve different problems:
+    Desired Configuration
+            ↓
+        Compare
+            ↓
+    Current Infrastructure
+            ↓
+    Calculate Difference
+            ↓
+    Proposed Changes
+            ↓
+        Apply Changes
 
-    Docker
-    → Containerization
+This difference-based workflow is the foundation of Terraform.
 
-    Terraform
-    → Infrastructure provisioning/management
+The practical lab later demonstrated this by:
 
-    Kubernetes
-    → Container orchestration
-
-The practical work for these concepts was performed in the Phase 2 supplementary lab and kept separate from the main MERN project.
-```
+    Creating the Nginx container
+            ↓
+    Changing the external port
+            ↓
+    Terraform detecting the difference
+            ↓
+    Replacing the container
+            ↓
+    Detecting manual drift
+            ↓
+    Restoring the desired state
 
 
-
-```markdown
 # Step 26 — Terraform
-## Part 2 — CLI & Configuration
+
+## Part 2 — Practical Configuration & Workflow
 
 ---
 
-## 5. Terraform CLI Commands
+## 10. Practice Environment
 
-The Terraform CLI was used throughout the practical lab to initialize, validate, plan, apply, inspect, modify, and destroy infrastructure.
+Terraform practice was performed in the Phase 2 supplementary lab:
 
-### 5.1 Check Terraform Version
+    /home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform
 
-    terraform version
+The lab used Docker as the local infrastructure platform.
 
-Purpose:
-
-    Displays the installed Terraform version and platform information.
-
-Actual environment:
-
-    Terraform v1.15.8
-    linux_amd64
-
----
-
-### 5.2 Initialize Terraform
-
-    terraform init
-
-Purpose:
-
-    Initializes the Terraform working directory and installs the required providers.
-
-In this lab, `terraform init` initialized the Docker provider:
-
-    kreuzwerker/docker
-
-Important result:
-
-    Terraform has been successfully initialized!
-
-It also created Terraform provider-related files/directories, including:
-
-    .terraform/
-    .terraform.lock.hcl
-
----
-
-### 5.3 Validate Configuration
-
-    terraform validate
-
-Purpose:
-
-    Checks whether the Terraform configuration is syntactically and structurally valid.
-
-Actual verification:
-
-    Success! The configuration is valid.
-
-`validate` does not create infrastructure.
-
----
-
-### 5.4 Preview Infrastructure Changes
-
-    terraform plan
-
-Purpose:
-
-    Compares the desired configuration with the current infrastructure/state and shows the changes Terraform proposes.
-
-Example from the practical lab:
-
-    Plan: 2 to add, 0 to change, 0 to destroy.
-
-Later, when the port was changed:
-
-    Plan: 1 to add, 0 to change, 1 to destroy.
-
-The second result demonstrated that Terraform needed to replace the existing container.
-
----
-
-### 5.5 Apply Configuration
-
-    terraform apply
-
-Purpose:
-
-    Applies the changes proposed by Terraform.
-
-For non-interactive lab execution, the following form was used:
-
-    terraform apply -auto-approve
-
-The practical lab successfully created infrastructure:
-
-    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
-
----
-
-### 5.6 Destroy Infrastructure
-
-    terraform destroy
-
-Purpose:
-
-    Removes infrastructure managed by the current Terraform configuration.
-
-The lab used:
-
-    terraform destroy -auto-approve
-
-Final result:
-
-    Destroy complete! Resources: 2 destroyed.
-
----
-
-### 5.7 Show Terraform State
-
-    terraform show
-
-Purpose:
-
-    Displays the current Terraform state and the resources recorded by Terraform.
-
-This was used to inspect:
-
-    docker_container.nginx
-    docker_image.nginx
-
-Important information included:
-
-    container name
-    image ID
-    network information
-    port mapping
-    resource ID
-
----
-
-### 5.8 List Managed Resources
-
-    terraform state list
-
-Purpose:
-
-    Lists resources currently tracked in Terraform state.
-
-During the practical lab, it displayed:
-
-    docker_container.nginx
-    docker_image.nginx
-
-After `terraform destroy`, the state list became empty because Terraform no longer managed those resources.
-
----
-
-### 5.9 Inspect a Specific Resource
-
-    terraform state show docker_container.nginx
-
-Purpose:
-
-    Displays detailed state information for a specific Terraform resource.
-
-The practical lab used filtering to focus on important attributes:
-
-    terraform state show docker_container.nginx | grep -E 'name =|image =|external =|internal ='
-
-This showed information such as:
-
-    name = "terraform-nginx"
-    external = 8081
-    internal = 80
-
----
-
-### 5.10 Inspect Providers
-
-    terraform providers
-
-Purpose:
-
-    Displays the providers required by the Terraform configuration.
-
-The lab verified the Docker provider:
-
-    kreuzwerker/docker
-
----
-
-### 5.11 Show Output Values
-
-    terraform output
-
-Purpose:
-
-    Displays values defined through Terraform `output` blocks.
-
-The lab eventually displayed:
-
-    container_name = "terraform-nginx"
-    container_port = 8081
-
-Before the output values had been applied to state, `terraform output` produced:
-
-    Warning: No outputs found
-
-This demonstrated that defining an output in configuration and storing its value in Terraform state are related but separate operations.
-
----
-
-### 5.12 Format Configuration
-
-    terraform fmt
-
-Purpose:
-
-    Formats Terraform configuration files according to Terraform's standard formatting rules.
-
-This was used after creating/updating Terraform configuration files.
-
----
-
-### 5.13 Generate Dependency Graph
-
-    terraform graph
-
-Purpose:
-
-    Generates a dependency graph representing relationships between Terraform resources.
-
-The practical lab showed the relationship:
-
-    docker_container.nginx
-            ↓
-    docker_image.nginx
-
-The container depended on the Docker image because the container configuration referenced the image resource.
-
----
-
-## 6. Command Explanation
-
-### Core Workflow
-
-    terraform init
-    terraform validate
-    terraform plan
-    terraform apply
-    terraform destroy
-
-Meaning:
-
-| Command | What it does |
-|---|---|
-| `init` | Prepares the Terraform working directory |
-| `validate` | Checks configuration validity |
-| `plan` | Previews changes |
-| `apply` | Performs changes |
-| `destroy` | Removes managed infrastructure |
-
----
-
-### State Commands
-
-    terraform state list
-
-Lists resources managed by Terraform.
-
-    terraform state show <resource>
-
-Shows detailed state information for one resource.
-
-    terraform show
-
-Shows the current Terraform state in a broader form.
-
----
-
-### Inspection Commands
-
-    terraform providers
-
-Shows required providers.
-
-    terraform output
-
-Shows configured output values.
-
-    terraform graph
-
-Shows Terraform resource relationships.
-
----
-
-## 7. Important Flags
-
-### `-auto-approve`
-
-Used with:
-
-    terraform apply -auto-approve
-
-and:
-
-    terraform destroy -auto-approve
-
-Purpose:
-
-    Skips the interactive approval prompt.
-
-This was appropriate for the controlled local learning lab.
-
-In production workflows, automatic approval should be used carefully because it removes the manual confirmation step.
-
----
-
-### `-E` with grep
-
-The practical resource inspection used:
-
-    grep -E 'name =|image =|external =|internal ='
-
-`-E` enables extended regular expressions.
-
-It allowed several fields to be selected in one command.
-
----
-
-### `--filter` with Docker
-
-The practical verification used:
-
-    docker ps --filter "name=terraform-nginx"
-
-Purpose:
-
-    Shows only Docker containers matching the specified filter.
-
-This made verification easier by focusing on the Terraform-managed container.
-
----
-
-### `--max-time` with curl
-
-During the old-port verification, the command used:
-
-    curl -I --max-time 3 http://localhost:8080
-
-`--max-time 3` limits the maximum time curl waits for the request.
-
-This prevented the verification command from waiting unnecessarily when port `8080` was no longer serving the container.
-
----
-
-## 8. Command Variations
-
-### Apply
-
-Interactive:
-
-    terraform apply
-
-Non-interactive:
-
-    terraform apply -auto-approve
-
-The interactive form is useful when manually reviewing and approving changes.
-
-The `-auto-approve` form is useful for controlled automation or lab execution.
-
----
-
-### Destroy
-
-Interactive:
-
-    terraform destroy
-
-Non-interactive:
-
-    terraform destroy -auto-approve
-
-Both perform the same fundamental operation; the difference is whether Terraform waits for interactive approval.
-
----
-
-### Resource Inspection
-
-General state:
-
-    terraform show
-
-Specific resource:
-
-    terraform state show docker_container.nginx
-
-Listing resources:
-
-    terraform state list
-
-These commands answer different questions:
-
-| Command | Main question |
-|---|---|
-| `terraform show` | What does the current state contain? |
-| `terraform state list` | Which resources are managed? |
-| `terraform state show <resource>` | What details are recorded for this resource? |
-
----
-
-### Docker Verification
-
-General running containers:
-
-    docker ps
-
-Filtered verification:
-
-    docker ps --filter "name=terraform-nginx"
-
-All containers, including stopped ones:
-
-    docker ps -a
-
-The practical lab used these variations to verify creation, running status, manual stopping, and cleanup.
-
----
-
-## 9. Configuration
-
-The Terraform lab used three main configuration files:
-
-    main.tf
-    variables.tf
-    outputs.tf
-
-Terraform also generated:
-
-    .terraform/
-    .terraform.lock.hcl
-    terraform.tfstate
-
----
-
-### 9.1 `main.tf`
-
-The main configuration contained the Terraform configuration, Docker provider, image resource, and container resource.
-
-Actual configuration:
-
-    terraform {
-      required_providers {
-        docker = {
-          source  = "kreuzwerker/docker"
-          version = "~> 3.0"
-        }
-      }
-    }
-
-    provider "docker" {}
-
-    resource "docker_image" "nginx" {
-      name = "nginx:alpine"
-    }
-
-    resource "docker_container" "nginx" {
-      name  = var.container_name
-      image = docker_image.nginx.image_id
-
-      ports {
-        internal = 80
-        external = var.external_port
-      }
-    }
-
----
-
-### 9.2 Required Provider
-
-The configuration declared:
-
-    source = "kreuzwerker/docker"
-
-and:
-
-    version = "~> 3.0"
-
-The provider allowed Terraform to communicate with Docker.
-
-The provider was initialized with:
-
-    terraform init
-
-The installed provider version was resolved by Terraform and recorded in:
-
-    .terraform.lock.hcl
-
----
-
-### 9.3 Docker Image Resource
-
-The practical lab defined:
-
-    resource "docker_image" "nginx" {
-      name = "nginx:alpine"
-    }
-
-This instructed Terraform to manage the Nginx Alpine Docker image.
-
----
-
-### 9.4 Docker Container Resource
-
-The practical lab defined:
-
-    resource "docker_container" "nginx" {
-      name  = var.container_name
-      image = docker_image.nginx.image_id
-
-      ports {
-        internal = 80
-        external = var.external_port
-      }
-    }
-
-Important configuration:
-
-    name = var.container_name
-
-Uses a variable for the container name.
-
-    image = docker_image.nginx.image_id
-
-References the image resource.
-
-This creates an implicit dependency:
-
-    docker_image.nginx
-            ↓
-    docker_container.nginx
-
-Port configuration:
-
-    internal = 80
-    external = var.external_port
-
-The Nginx container listened on port `80`, while the Ubuntu host exposed it through the configured external port.
-
----
-
-### 9.5 `variables.tf`
-
-The lab defined:
-
-    variable "container_name" {
-      description = "Name of the Nginx container"
-      type        = string
-      default     = "terraform-nginx"
-    }
-
-    variable "external_port" {
-      description = "Host port for Nginx"
-      type        = number
-      default     = 8081
-    }
-
-Variables separate configurable values from the resource definition.
-
----
-
-### 9.6 `outputs.tf`
-
-The lab defined:
-
-    output "container_name" {
-      description = "Name of the managed Nginx container"
-      value       = docker_container.nginx.name
-    }
-
-    output "container_port" {
-      description = "Host port exposed for Nginx"
-      value       = docker_container.nginx.ports[0].external
-    }
-
-These outputs exposed useful information from the managed Docker container.
-
-The resulting values were:
-
-    container_name = "terraform-nginx"
-    container_port = 8081
-
----
-
-### 9.7 Terraform State
-
-The practical lab generated:
-
-    terraform.tfstate
-
-The state recorded information about resources managed by Terraform.
-
-Examples included:
-
-    docker_container.nginx
-    docker_image.nginx
-
-The state also contained information such as:
-
-    resource IDs
-    image IDs
-    container name
-    port mappings
-    network information
-
-The state was used during subsequent `terraform plan` operations to compare the desired configuration with the infrastructure Terraform was managing.
-
----
-
-### 9.8 Configuration Change Demonstration
-
-The practical lab initially used:
-
-    external_port = 8080
-
-Later it was changed to:
-
-    external_port = 8081
-
-Terraform detected the difference during:
-
-    terraform plan
-
-The plan indicated that the Docker container required replacement:
-
-    external = 8080 -> 8081 # forces replacement
-
-Terraform then performed:
-
-    destroy old container
-    create new container
-
-The new container exposed:
-
-    0.0.0.0:8081->80/tcp
-
-The application was verified using:
-
-    curl -I http://localhost:8081
-
-The response returned:
-
-    HTTP/1.1 200 OK
-
----
-
-### 9.9 Configuration and State Relationship
-
-The practical configuration can be summarized as:
-
-    main.tf
-        ↓
-    Defines resources and desired configuration
-
-    variables.tf
-        ↓
-    Defines configurable inputs
-
-    outputs.tf
-        ↓
-    Defines useful returned values
-
-    terraform.tfstate
-        ↓
-    Records Terraform-managed infrastructure information
-
-Together, these components allowed Terraform to understand, manage, inspect, modify, and eventually destroy the infrastructure used in the practical lab.
-
----
-
-## Part 2 Summary
-
-The Terraform CLI and configuration workflow used in this step was:
-
-    main.tf
-    variables.tf
-    outputs.tf
-            ↓
-    terraform init
-            ↓
-    terraform validate
-            ↓
-    terraform plan
-            ↓
-    terraform apply
-            ↓
-    terraform state / show / output
-            ↓
-    configuration change
-            ↓
-    terraform plan
-            ↓
-    infrastructure replacement
-            ↓
-    drift detection and reconciliation
-            ↓
-    terraform destroy
-
-The configuration remained in the supplementary lab after destruction, while the Docker infrastructure managed by Terraform was removed.
-```
-
-
-```markdown
-# Step 26 — Terraform
-## Part 3 — Practical Lab & Troubleshooting
-
----
-
-## 10. Practical Work
-
-The Terraform practical lab was performed separately from the main MERN project.
-
-Practice directory:
-
-    /home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/
-
-The lab used Docker as a local infrastructure platform to avoid unnecessary cloud credentials and billing.
-
-The practical infrastructure consisted of:
+The practical setup was:
 
     Terraform
         ↓
@@ -1267,19 +376,72 @@ The practical infrastructure consisted of:
         ↓
     nginx:alpine
         ↓
-    terraform-nginx container
+    terraform-nginx
+
+This allowed Terraform concepts to be practiced locally without requiring cloud credentials or cloud billing.
 
 ---
 
-### 10.1 Initial Terraform Configuration
+## 11. Terraform Configuration Files
 
-The first Terraform configuration declared the Docker provider.
+The main Terraform configuration file was:
 
-The provider was initialized with:
+    main.tf
+
+The configuration declared the Docker provider and the Docker resources required for the lab.
+
+Terraform also created its local working/state-related files during the workflow.
+
+Important files/directories observed:
+
+    main.tf
+    .terraform/
+    .terraform.lock.hcl
+    terraform.tfstate
+
+| File / Directory | Purpose |
+|---|---|
+| `main.tf` | Defines the desired infrastructure |
+| `.terraform/` | Terraform working directory containing initialized provider/plugin data |
+| `.terraform.lock.hcl` | Records the selected provider version information |
+| `terraform.tfstate` | Records Terraform-managed infrastructure state |
+
+---
+
+## 12. Terraform Initialization
+
+The first major Terraform command was:
 
     terraform init
 
-The configuration was then validated with:
+Purpose:
+
+    Initialize the Terraform working directory
+    ↓
+    Install required providers
+    ↓
+    Prepare Terraform for other commands
+
+The Docker provider was installed successfully.
+
+Observed provider:
+
+    kreuzwerker/docker v3.9.0
+
+Terraform reported:
+
+    Terraform has been successfully initialized!
+
+The initialization also created:
+
+    .terraform/
+    .terraform.lock.hcl
+
+---
+
+## 13. Terraform Validation
+
+After initialization, the configuration was checked with:
 
     terraform validate
 
@@ -1287,74 +449,151 @@ Result:
 
     Success! The configuration is valid.
 
-No infrastructure was created during initialization or validation.
+This verified that Terraform could successfully parse and validate the configuration.
+
+`terraform validate` does not create infrastructure.
 
 ---
 
-### 10.2 First Terraform Resources
+## 14. Terraform Formatting
 
-Two Terraform resources were created:
+The configuration was formatted using:
+
+    terraform fmt
+
+Purpose:
+
+    Format Terraform configuration using Terraform's standard style.
+
+Formatting improves consistency and readability.
+
+---
+
+## 15. Creating the Docker Image Resource
+
+The first infrastructure resource was:
 
     docker_image.nginx
 
-and:
-
-    docker_container.nginx
-
-The image resource managed:
+The image used was:
 
     nginx:alpine
 
-The container resource managed:
+Terraform was responsible for ensuring that the required Docker image existed.
+
+Conceptually:
+
+    Terraform Configuration
+            ↓
+    docker_image.nginx
+            ↓
+    nginx:alpine
+
+---
+
+## 16. Creating the Docker Container Resource
+
+The second resource was:
+
+    docker_container.nginx
+
+The container name was:
 
     terraform-nginx
 
-The container exposed:
+The container used the Nginx image and exposed:
 
-    Host: 8080
-    Container: 80
+    Host Port: 8080
+    Container Port: 80
+
+The port mapping was:
+
+    0.0.0.0:8080 → 80/tcp
+
+The important relationship was:
+
+    docker_image.nginx
+            ↓
+    docker_container.nginx
+
+Terraform determined that the container depended on the image.
+
+---
+
+## 17. Terraform Plan
+
+After configuring the resources, the infrastructure was previewed using:
+
+    terraform plan
 
 The initial plan showed:
 
     Plan: 2 to add, 0 to change, 0 to destroy.
 
-This demonstrated that Terraform had identified two resources that did not yet exist.
+The two resources were:
+
+    docker_image.nginx
+    docker_container.nginx
+
+The `+` symbol in the plan represented a resource that Terraform intended to create.
+
+Important idea:
+
+    terraform plan
+        =
+    Preview only
+
+It does not create or modify the infrastructure.
 
 ---
 
-### 10.3 Applying the Initial Infrastructure
+## 18. Terraform Apply
 
-The configuration was applied with:
+The planned infrastructure was created using:
 
     terraform apply -auto-approve
 
-Terraform created the image first:
+Terraform created:
 
-    docker_image.nginx: Creation complete
+    docker_image.nginx
 
-Then it created the container:
+followed by:
 
-    docker_container.nginx: Creation complete
+    docker_container.nginx
 
-Final result:
+The final result was:
 
     Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 
-This demonstrated the dependency between the Docker image and container.
-
----
-
-### 10.4 Application Verification
-
-The Docker container was verified with:
-
-    docker ps --filter "name=terraform-nginx"
-
-The container was running and exposed:
+The Docker container was then running with:
 
     0.0.0.0:8080->80/tcp
 
-The Nginx application was then tested with:
+---
+
+## 19. Verify the Docker Container
+
+The container was verified using:
+
+    docker ps --filter "name=terraform-nginx"
+
+Important output:
+
+    STATUS
+    Up
+
+and:
+
+    PORTS
+    0.0.0.0:8080->80/tcp
+
+This proved that the Terraform-managed container was running and the port mapping was active.
+
+---
+
+## 20. Verify Nginx Through HTTP
+
+The Nginx service was tested using:
 
     curl http://localhost:8080
 
@@ -1362,45 +601,53 @@ The response contained:
 
     Welcome to nginx!
 
-This verified the infrastructure at both the container level and application level.
+This verification was important because it checked the complete path:
+
+    Terraform
+        ↓
+    Docker Container
+        ↓
+    Nginx
+        ↓
+    Host Port 8080
+        ↓
+    HTTP Request
+
+Therefore the infrastructure was not only created but also functionally reachable.
 
 ---
 
-### 10.5 Variables
+## 21. Variables
 
-The configuration was later changed to use Terraform variables.
+Variables were introduced to make the configuration more flexible.
 
-The variables included:
+The external port was represented using:
 
-    container_name
+    var.external_port
 
-and:
+The variable was defined with:
 
-    external_port
+    variable "external_port" {
+        description = "Host port for Nginx"
+        type        = number
+        default     = 8081
+    }
 
-The container resource used:
+The resource then used the variable instead of a fixed port value.
 
-    name = var.container_name
-
-and:
-
-    external = var.external_port
-
-The default external port was later changed from:
-
-    8080
-
-to:
-
-    8081
-
-This demonstrated how variables separate configurable values from resource definitions.
+| Without Variable | With Variable |
+|---|---|
+| `external = 8080` | `external = var.external_port` |
+| Value directly inside resource | Value controlled by variable |
+| Less flexible | More reusable |
 
 ---
 
-### 10.6 Outputs
+## 22. Outputs
 
-Terraform outputs were added for:
+Outputs were added for useful Terraform information.
+
+The configured outputs were:
 
     container_name
 
@@ -1408,143 +655,76 @@ and:
 
     container_port
 
-The first `terraform plan` after adding the outputs showed:
-
-    Changes to Outputs:
-      + container_name = "terraform-nginx"
-      + container_port = 8080
-
-At that point, the output values had not yet been stored in state.
-
-Running:
-
-    terraform output
-
-produced:
-
-    Warning: No outputs found
-
 After applying the output configuration, Terraform displayed:
 
     container_name = "terraform-nginx"
     container_port = 8080
 
-This demonstrated that output definitions become available through `terraform output` after the values are applied to Terraform state.
+Later, after changing the port:
+
+    container_name = "terraform-nginx"
+    container_port = 8081
+
+Outputs provide a convenient way to expose important values from Terraform state.
 
 ---
 
-## 11. What to Observe
+## 23. Configuration Change
 
-The practical lab used observation as part of every major Terraform operation.
-
-### 11.1 After `terraform init`
-
-Observe:
-
-    Terraform has been successfully initialized!
-
-Also observe the creation of provider-related files/directories such as:
-
-    .terraform/
-    .terraform.lock.hcl
-
-Meaning:
-
-The working directory has been initialized and the required Docker provider has been installed/locked.
-
----
-
-### 11.2 After `terraform validate`
-
-Expected result:
-
-    Success! The configuration is valid.
-
-Meaning:
-
-Terraform can parse and validate the configuration successfully.
-
----
-
-### 11.3 After `terraform plan`
-
-The first plan showed:
-
-    Plan: 2 to add, 0 to change, 0 to destroy.
-
-Meaning:
-
-Terraform identified two resources that needed to be created.
-
----
-
-### 11.4 After `terraform apply`
-
-Expected result:
-
-    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
-
-Meaning:
-
-The planned infrastructure was actually created.
-
----
-
-### 11.5 After Docker Verification
-
-The container showed:
-
-    Up
-
-and:
-
-    0.0.0.0:8080->80/tcp
-
-Meaning:
-
-The container was running and the host-to-container port mapping was active.
-
----
-
-### 11.6 After `curl`
-
-The Nginx response contained:
-
-    Welcome to nginx!
-
-Meaning:
-
-The container was not only running, but the web server was reachable through the exposed port.
-
----
-
-### 11.7 After Changing the Port
-
-The desired port was changed:
+The external Docker port was changed:
 
     8080 → 8081
+
+Terraform was then asked to calculate the difference using:
+
+    terraform plan
 
 The plan showed:
 
     external = 8080 -> 8081 # forces replacement
 
-Meaning:
+Terraform therefore planned:
 
-The Docker container could not perform this particular change in place through the provider, so Terraform planned to replace the container.
+    Destroy old container
+            ↓
+    Create new container
+            ↓
+    Use port 8081
+
+The plan summary was:
+
+    Plan: 1 to add, 0 to change, 1 to destroy.
+
+This demonstrated that not every infrastructure change can be performed in place.
 
 ---
 
-### 11.8 After Applying the Port Change
+## 24. Applying the Configuration Change
 
-Terraform reported:
+The new desired state was applied using:
+
+    terraform apply -auto-approve
+
+Terraform destroyed the old container and created a replacement.
+
+Result:
 
     Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
 
-Docker then showed:
+The new container exposed:
 
     0.0.0.0:8081->80/tcp
 
-Nginx was verified through:
+The output also changed to:
+
+    container_name = "terraform-nginx"
+    container_port = 8081
+
+---
+
+## 25. Verify the Changed Infrastructure
+
+The new port was tested with:
 
     curl -I http://localhost:8081
 
@@ -1552,72 +732,41 @@ The response returned:
 
     HTTP/1.1 200 OK
 
-The old port `8080` was no longer serving the Nginx container.
+The old port was also tested:
+
+    curl http://localhost:8080
+
+The result was:
+
+    Failed to connect to localhost port 8080
+
+This proved that the infrastructure had actually changed from port `8080` to port `8081`.
 
 ---
 
-### 11.9 After the Final Plan
+## 26. Final Plan Verification
 
-After the port replacement, the final plan returned:
+After applying the configuration change, Terraform was run again with:
+
+    terraform plan
+
+Result:
 
     No changes. Your infrastructure matches the configuration.
 
-Meaning:
+This confirmed:
 
-    Desired State = Actual Infrastructure
+    Desired Configuration
+            =
+    Actual Infrastructure
 
-Terraform did not need to make any further changes.
-
----
-
-## 12. Actual Output Meaning
-
-### 12.1 `2 to add`
-
-Example:
-
-    Plan: 2 to add, 0 to change, 0 to destroy.
-
-Meaning:
-
-Two resources are absent from the current infrastructure and need to be created.
-
-In this lab:
-
-    docker_image.nginx
-    docker_container.nginx
+No additional changes were required.
 
 ---
 
-### 12.2 `1 to add, 1 to destroy`
+## 27. Terraform State Inspection
 
-When the port changed from `8080` to `8081`, Terraform showed:
-
-    Plan: 1 to add, 0 to change, 1 to destroy.
-
-Meaning:
-
-The existing container needed to be replaced.
-
-The image did not need to be recreated because its configuration had not changed.
-
----
-
-### 12.3 `No changes`
-
-The message:
-
-    No changes. Your infrastructure matches the configuration.
-
-means Terraform compared the current infrastructure with the configuration and found no difference requiring action.
-
-This is an important Terraform verification result.
-
----
-
-### 12.4 Terraform State
-
-The lab inspected state with:
+The managed resources were inspected using:
 
     terraform state list
 
@@ -1626,35 +775,280 @@ The resources were:
     docker_container.nginx
     docker_image.nginx
 
-The container state was inspected with:
+The container state was inspected using:
 
     terraform state show docker_container.nginx
 
-Important recorded information included:
+Important values included:
 
     name = "terraform-nginx"
     external = 8081
     internal = 80
 
-The state therefore contained information about the infrastructure Terraform was managing.
+This demonstrated that Terraform maintains information about the infrastructure it manages.
 
 ---
 
-### 12.5 Dependency
+## 28. Terraform Dependency Graph
 
-The dependency graph showed a relationship between:
+The dependency relationship was inspected using:
+
+    terraform graph
+
+The graph showed:
 
     docker_container.nginx
+            ↓
+    docker_image.nginx
 
-and:
+The relationship exists because the container uses the image resource.
+
+Terraform can therefore determine the correct resource dependency automatically.
+
+---
+
+## 29. Practical Workflow Completed
+
+The practical Terraform workflow was:
+
+    Create Configuration
+            ↓
+    terraform init
+            ↓
+    terraform fmt
+            ↓
+    terraform validate
+            ↓
+    terraform plan
+            ↓
+    terraform apply
+            ↓
+    Verify Docker Container
+            ↓
+    Verify Nginx
+            ↓
+    Add Variables
+            ↓
+    Add Outputs
+            ↓
+    Change Port
+            ↓
+    terraform plan
+            ↓
+    Resource Replacement
+            ↓
+    terraform apply
+            ↓
+    Verify New Port
+            ↓
+    terraform plan
+            ↓
+    No Changes
+    
+    
+    
+    
+    # Step 26 — Terraform
+
+## Part 3 — Practical Observations & Troubleshooting
+
+---
+
+## 30. What to Observe
+
+Terraform learning was performed by observing the actual infrastructure changes rather than only running commands.
+
+The important observations were:
+
+| Stage | What to Observe | What It Proves |
+|---|---|---|
+| `terraform init` | Provider installed successfully | Terraform is ready to work |
+| `terraform validate` | `Success! The configuration is valid.` | Configuration is syntactically valid |
+| `terraform plan` | Planned resources and change symbols | Terraform understands the desired changes |
+| `terraform apply` | Resources created/changed/destroyed | Desired state was applied |
+| `docker ps` | Container status and ports | Infrastructure exists in Docker |
+| `curl` | Nginx HTTP response | Application is reachable |
+| `terraform output` | Output values | Useful state values are exposed |
+| `terraform state list` | Managed resources | Terraform knows which resources it manages |
+| Final `terraform plan` | `No changes` | Actual infrastructure matches configuration |
+
+---
+
+## 31. Initial Plan Observation
+
+The first Terraform plan showed:
+
+    Plan: 2 to add, 0 to change, 0 to destroy.
+
+The two resources were:
+
+    docker_image.nginx
+    docker_container.nginx
+
+The `+` symbol represented creation.
+
+Therefore Terraform understood that the required infrastructure did not yet exist.
+
+---
+
+## 32. Initial Apply Observation
+
+After applying the plan, Terraform reported:
+
+    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+The resources were:
+
+    docker_image.nginx
+    docker_container.nginx
+
+The Docker container was then verified as:
+
+    STATUS: Up
+
+with:
+
+    0.0.0.0:8080->80/tcp
+
+This confirmed that Terraform successfully created the infrastructure described by the configuration.
+
+---
+
+## 33. Nginx Verification
+
+The running container was tested with:
+
+    curl http://localhost:8080
+
+The response contained:
+
+    Welcome to nginx!
+
+This was an important observation because it proved more than just container creation.
+
+The complete path worked:
+
+    Host
+      ↓
+    Port 8080
+      ↓
+    Docker Container
+      ↓
+    Container Port 80
+      ↓
+    Nginx
+      ↓
+    HTTP Response
+
+---
+
+## 34. Output Observation
+
+After outputs were added, the first plan showed:
+
+    Changes to Outputs:
+      + container_name = "terraform-nginx"
+      + container_port = 8080
+
+Before applying the output configuration, running:
+
+    terraform output
+
+returned:
+
+    Warning: No outputs found
+
+This happened because the output definitions had not yet been stored in Terraform state.
+
+After applying the configuration, the output became available:
+
+    container_name = "terraform-nginx"
+    container_port = 8080
+
+This demonstrated the relationship between Terraform configuration and Terraform state.
+
+---
+
+## 35. Configuration Change Observation
+
+The external port was changed:
+
+    8080 → 8081
+
+Running:
+
+    terraform plan
+
+showed:
+
+    external = 8080 -> 8081 # forces replacement
+
+The plan summary was:
+
+    Plan: 1 to add, 0 to change, 1 to destroy.
+
+This means Terraform could not modify this container port in place.
+
+Instead, it planned:
+
+    Destroy old container
+            ↓
+    Create replacement container
+            ↓
+    Use port 8081
+
+---
+
+## 36. Replacement Observation
+
+After applying the port change, Terraform reported:
+
+    Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+The new container showed:
+
+    0.0.0.0:8081->80/tcp
+
+The new HTTP endpoint returned:
+
+    HTTP/1.1 200 OK
+
+The old port returned a connection failure.
+
+Therefore the configuration change was successfully applied.
+
+---
+
+## 37. State Observation
+
+Terraform state was inspected using:
+
+    terraform state list
+
+The managed resources were:
+
+    docker_container.nginx
+    docker_image.nginx
+
+The container state showed values including:
+
+    name = "terraform-nginx"
+    external = 8081
+    internal = 80
+
+This demonstrated that Terraform keeps track of the resources it manages.
+
+---
+
+## 38. Dependency Observation
+
+The Terraform dependency graph showed the relationship between:
 
     docker_image.nginx
 
-The container configuration referenced:
+and:
 
-    docker_image.nginx.image_id
-
-Therefore the container depended on the image.
+    docker_container.nginx
 
 Conceptually:
 
@@ -1662,138 +1056,55 @@ Conceptually:
             ↓
     docker_container.nginx
 
-Terraform could therefore determine the appropriate resource relationship automatically.
+The container requires the image.
+
+Terraform therefore understands that the image must be available before the container can use it.
 
 ---
 
-## 13. Differences
+## 39. Drift Detection
 
-### 13.1 Desired State vs Actual State
+A manual change was intentionally made outside Terraform.
 
-| Desired State | Actual State |
-|---|---|
-| Defined by Terraform configuration | Exists in Docker |
-| Describes what should exist | Represents what actually exists |
-| Example: port `8081` | Example: container exposing `8081` |
-| Source: `.tf` configuration | Source: real infrastructure/provider information |
-
-Terraform compares these states to determine required actions.
-
----
-
-### 13.2 Configuration vs State
-
-| Configuration | State |
-|---|---|
-| Defines desired infrastructure | Records managed infrastructure information |
-| `.tf` files | `terraform.tfstate` |
-| Written/edited by the user | Maintained by Terraform |
-| Remains as configuration after destroy | Managed resource entries are removed after destroy |
-
----
-
-### 13.3 Resource vs Provider
-
-| Provider | Resource |
-|---|---|
-| Connects Terraform to an external platform | Represents an infrastructure object |
-| Example: Docker provider | Example: Docker container |
-| Enables Terraform to communicate with Docker | Defines what Terraform manages |
-
----
-
-## 14. Troubleshooting
-
-### 14.1 `terraform output` — No Outputs Found
-
-Observed situation:
-
-    Warning: No outputs found
-
-Cause:
-
-Output blocks had been added to configuration, but their values had not yet been stored in Terraform state.
-
-Resolution:
-
-    terraform apply -auto-approve
-
-Verification:
-
-    terraform output
-
-Result:
-
-    container_name = "terraform-nginx"
-    container_port = 8080
-
----
-
-### 14.2 Configuration Change Requires Replacement
-
-Observed plan:
-
-    external = 8080 -> 8081 # forces replacement
-
-Cause:
-
-The Docker container resource could not apply this particular port change in place.
-
-Terraform therefore planned:
-
-    destroy old container
-            ↓
-    create new container
-
-Verification after apply:
-
-    0.0.0.0:8081->80/tcp
-
-and:
-
-    HTTP/1.1 200 OK
-
----
-
-### 14.3 Drift Detection
-
-A manual change was deliberately introduced outside Terraform:
+The running container was stopped manually:
 
     docker stop terraform-nginx
 
 Docker then showed:
 
-    Exited (0)
+    STATUS: Exited (0)
 
-The desired Terraform configuration still required the container to exist and run.
+However, the Terraform configuration still described a running container.
 
 Running:
 
     terraform plan
 
-produced:
+then produced:
 
     Plan: 1 to add, 0 to change, 0 to destroy.
 
-Terraform recognized that the required container was no longer present in the expected state and proposed creating it again.
+Terraform proposed recreating the missing container.
+
+This demonstrated infrastructure drift.
 
 ---
 
-### 14.4 Drift Reconciliation
+## 40. Drift Reconciliation
 
-The drift was corrected with:
+The desired state was restored with:
 
     terraform apply -auto-approve
 
-Terraform created a new container.
+Terraform created a replacement container.
 
 Result:
 
     Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
-Docker verification showed:
+Docker then showed:
 
-    Up
+    STATUS: Up
 
 and:
 
@@ -1803,98 +1114,262 @@ A final plan returned:
 
     No changes. Your infrastructure matches the configuration.
 
-This demonstrated Terraform's reconciliation behavior.
+The drift was therefore successfully reconciled.
 
 ---
 
-### 14.5 Important Troubleshooting Workflow
+## 41. Desired State vs Actual State
 
-A practical Terraform troubleshooting flow is:
+The practical lab demonstrated the difference between desired and actual state.
 
-    Check configuration
+| State | Example |
+|---|---|
+| Desired State | Terraform configuration requires `terraform-nginx` on port `8081` |
+| Actual State | Docker container is actually running on port `8081` |
+| Drift | Container is manually stopped |
+| Reconciliation | Terraform recreates the container |
+
+The important workflow was:
+
+    Desired State
           ↓
+    Compare
+          ↓
+    Actual State
+          ↓
+    Difference?
+       ↙       ↘
+     Yes        No
+      ↓          ↓
+    Correct    No Change
+
+---
+
+## 42. Troubleshooting — Output Not Available
+
+### Problem
+
+Running:
+
+    terraform output
+
+initially returned:
+
+    Warning: No outputs found
+
+### Cause
+
+The output blocks existed in the configuration, but their values had not yet been saved to Terraform state.
+
+### Fix
+
+Apply the configuration:
+
+    terraform apply -auto-approve
+
+Then verify:
+
+    terraform output
+
+### Result
+
+The expected values became available:
+
+    container_name = "terraform-nginx"
+    container_port = 8080
+
+---
+
+## 43. Troubleshooting — Resource Replacement
+
+### Problem
+
+Changing the external port produced:
+
+    # docker_container.nginx must be replaced
+
+and:
+
+    external = 8080 -> 8081 # forces replacement
+
+### Cause
+
+The Docker container resource required replacement for this configuration change.
+
+### Terraform Action
+
+Terraform planned:
+
+    1 to add
+    0 to change
+    1 to destroy
+
+### Verification
+
+After apply:
+
+    0.0.0.0:8081->80/tcp
+
+and:
+
+    HTTP/1.1 200 OK
+
+The replacement was successful.
+
+---
+
+## 44. Troubleshooting — Configuration Drift
+
+### Problem
+
+The container was manually stopped:
+
+    docker stop terraform-nginx
+
+Docker showed:
+
+    Exited (0)
+
+### Cause
+
+The actual infrastructure no longer matched the Terraform-managed desired state.
+
+### Detection
+
+    terraform plan
+
+Result:
+
+    Plan: 1 to add, 0 to change, 0 to destroy.
+
+### Fix
+
+    terraform apply -auto-approve
+
+### Verification
+
+The container returned to:
+
+    STATUS: Up
+
+The final plan returned:
+
+    No changes. Your infrastructure matches the configuration.
+
+---
+
+## 45. Important Terraform Plan Symbols
+
+| Symbol | Meaning |
+|---|---|
+| `+` | Create |
+| `-` | Destroy |
+| `~` | Modify in place |
+| `-/+` | Destroy and recreate |
+| No symbol/change | No infrastructure change required |
+
+The most important example from the lab was:
+
+    -/+ destroy and then create replacement
+
+This appeared when the container port changed from:
+
+    8080 → 8081
+
+---
+
+## 46. Troubleshooting Workflow
+
+The practical troubleshooting workflow can be summarized as:
+
+    Check Configuration
+            ↓
     terraform validate
-          ↓
-    Inspect current state
-          ↓
+            ↓
+    Inspect State
+            ↓
     terraform state list
-          ↓
-    Refresh/compare through
+            ↓
+    Preview Changes
+            ↓
     terraform plan
-          ↓
-    Understand proposed action
-          ↓
+            ↓
+    Understand the Plan
+            ↓
     terraform apply
-          ↓
-    Verify actual infrastructure
-          ↓
+            ↓
+    Verify Docker
+            ↓
+    Verify Application
+            ↓
     terraform plan
-          ↓
-    Confirm "No changes"
+            ↓
+    No changes
 
-The practical lab followed this approach when testing configuration changes and infrastructure drift.
+This workflow helps prevent blindly applying infrastructure changes.
 
 ---
 
-## Practical Lab Result
+## 47. Practical Learning Result
 
-The Terraform lab successfully demonstrated:
+The Terraform lab demonstrated the complete relationship between configuration, state, and infrastructure:
 
-    Provider initialization
-    Resource creation
-    Variables
-    Outputs
-    Terraform state
-    Resource dependencies
-    Plan and apply workflow
-    Configuration changes
-    Resource replacement
-    Drift detection
-    Drift reconciliation
-    Infrastructure verification
-    Infrastructure destruction
+    Terraform Configuration
+            ↓
+      Desired State
+            ↓
+    terraform plan
+            ↓
+    Planned Changes
+            ↓
+    terraform apply
+            ↓
+    Real Infrastructure
+            ↓
+    Verification
+            ↓
+    Configuration Change / Drift
+            ↓
+    terraform plan
+            ↓
+    Reconciliation
+            ↓
+    No Changes
 
-The practical environment remained local and used Docker, avoiding cloud billing and external infrastructure costs.
-```
-```markdown
+The practical lab therefore established the core Terraform operating model required for the next DevOps concepts.
+
+
+
+
 # Step 26 — Terraform
-## Part 4 — Final Verification & Lessons
+
+## Part 4 — Final Verification, Security & Summary
 
 ---
 
-## 15. Project Integration
+## 48. Project Integration
 
-Step 26 was implemented as a **Phase 2 supplementary lab**.
+Step 26 was completed as a Phase 2 supplementary lab.
 
-The Terraform practical work was intentionally kept separate from the Phase 1 MERN project.
+The Terraform practice was intentionally kept separate from the main MERN project.
 
-### Practice Location
+| Area | Path |
+|---|---|
+| Terraform Practice | `/home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/` |
+| Documentation | `/home/afroza/Projects/devops-learning/Step-26-Terraform/` |
+| Main MERN Project | `/home/afroza/Projects/mern-devops-practice/Blog-App-using-MERN-stack` |
 
-    /home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/
+The main MERN project was not modified during the Terraform lab.
 
-### Main MERN Project
+The purpose of the separate lab was to understand Terraform as an Infrastructure as Code tool without unnecessarily introducing Terraform into the existing application project.
 
-    /home/afroza/Projects/mern-devops-practice/Blog-App-using-MERN-stack
+---
 
-The MERN project was not modified for the Terraform practical.
+## 49. Relationship with Previous DevOps Steps
 
-### Documentation Location
+Terraform builds on the infrastructure knowledge developed in the previous steps.
 
-    /home/afroza/Projects/devops-learning/Step-26-Terraform/
-
-### Why Terraform Was Practiced Separately
-
-Terraform is primarily concerned with:
-
-    Infrastructure provisioning
-    Infrastructure management
-    Desired infrastructure state
-
-The existing MERN project had already been used for the relevant Phase 1 Docker, Docker Compose, GitHub Actions, and Cloud Fundamentals work.
-
-Terraform was therefore practiced independently to understand its infrastructure-management role without unnecessarily forcing it into the application project.
-
-### Relationship with Previous DevOps Steps
+The relationship is:
 
     Docker
         ↓
@@ -1904,151 +1379,156 @@ Terraform was therefore practiced independently to understand its infrastructure
         ↓
     Multi-container local environment
 
+    GitHub Actions
+        ↓
+    CI/CD automation
+
+    Cloud Fundamentals
+        ↓
+    Understanding cloud infrastructure
+
     Terraform
         ↓
-    Infrastructure provisioning and management
+    Infrastructure as Code
 
     Kubernetes
         ↓
-    Container orchestration
+    Container Orchestration
 
-These technologies solve different problems and can be combined in larger production environments, but they do not need to be artificially combined in every learning project.
+These technologies solve different problems.
+
+| Technology | Main Responsibility |
+|---|---|
+| Docker | Containerization |
+| Docker Compose | Multi-container local environments |
+| Terraform | Infrastructure provisioning and management |
+| Kubernetes | Container orchestration |
 
 ---
 
-## 16. Security Considerations
+## 50. Security Considerations
 
-Although the practical lab used only local Docker infrastructure, several Terraform security principles are important.
+Although this lab used only local Docker infrastructure, Terraform security practices are important for real environments.
 
-### 16.1 Protect Terraform State
+### 50.1 Protect Terraform State
 
-Terraform state can contain sensitive infrastructure information and, depending on the configuration, may contain sensitive values.
-
-The practical lab generated:
+The practical lab created:
 
     terraform.tfstate
 
-Therefore state files should not be treated as ordinary harmless configuration files.
+Terraform state may contain infrastructure information and, depending on the configuration, sensitive values.
+
+Therefore state should be protected and should not be exposed publicly.
 
 Important practices:
 
-    Protect terraform.tfstate
-    Do not expose state publicly
-    Avoid committing sensitive state to public repositories
-    Use appropriate remote state and access controls in production
+    Protect state files
+    Restrict access
+    Do not expose sensitive state
+    Use secure remote state management in production
 
 ---
 
-### 16.2 Do Not Hard-Code Credentials
+### 50.2 Do Not Hard-Code Secrets
 
-Cloud credentials, API tokens, passwords, and other secrets should not be placed directly inside Terraform configuration files.
+Credentials, passwords, API tokens, and cloud access keys should not be placed directly inside Terraform configuration.
 
-Avoid patterns such as:
+Avoid storing real secrets directly in:
 
-    password = "real-password"
-    access_key = "real-secret"
+    *.tf
 
-Production Terraform environments should use secure credential mechanisms and secret-management systems.
+files.
+
+Production environments should use secure credential and secret-management mechanisms.
 
 ---
 
-### 16.3 Principle of Least Privilege
+### 50.3 Least Privilege
 
-Terraform credentials should have only the permissions required for the infrastructure operations they perform.
+Terraform should receive only the permissions required to manage the required infrastructure.
 
-Avoid giving Terraform unnecessarily broad administrative permissions.
+The principle is:
 
-A production setup should follow:
-
-    Minimum required permissions
+    Minimum Required Permissions
             ↓
-    Limited blast radius
+    Smaller Blast Radius
             ↓
-    Better security
+    Better Security
 
 ---
 
-### 16.4 Review `terraform plan`
+### 50.4 Review Terraform Plan
 
-Before applying infrastructure changes, review the plan carefully.
+Infrastructure changes should be reviewed before applying them.
 
-The practical workflow demonstrated:
+Recommended workflow:
 
     terraform plan
-            ↓
-    Review proposed changes
-            ↓
+          ↓
+    Review Changes
+          ↓
     terraform apply
 
-This is particularly important when infrastructure changes could affect production systems or incur cloud costs.
+The practical lab demonstrated why this is important when changing the external port.
+
+Terraform clearly showed:
+
+    external = 8080 -> 8081
+    # forces replacement
+
+This allowed the replacement behavior to be understood before applying it.
 
 ---
 
-### 16.5 Be Careful with `-auto-approve`
+### 50.5 `-auto-approve`
 
 The lab used:
 
     terraform apply -auto-approve
 
-and:
+for controlled local practice.
 
-    terraform destroy -auto-approve
+The flag skips Terraform's interactive approval prompt.
 
-because the environment was a controlled local learning lab.
-
-`-auto-approve` removes the interactive approval step.
-
-For production infrastructure, automatic approval should only be used when the surrounding CI/CD workflow provides appropriate review and safety controls.
+For production infrastructure, automatic approval should be used only when appropriate review and safety controls already exist in the workflow.
 
 ---
 
-### 16.6 Avoid Unnecessary Cloud Costs
+### 50.6 Avoid Unnecessary Cloud Costs
 
-The Terraform lab used local Docker infrastructure instead of a cloud provider.
+The practical lab used local Docker infrastructure instead of a real cloud provider.
 
 This avoided:
 
     Cloud credentials
     Cloud resource charges
-    Accidental infrastructure costs
+    Accidental billing
 
-This was appropriate for the learning objective.
+This was appropriate for learning the Terraform fundamentals.
 
 ---
 
-## 17. Verification
+## 51. Final Verification
 
-The Terraform practical was verified at multiple levels.
-
-### 17.1 Terraform Installation
-
-Verified:
+The Terraform installation was verified as:
 
     Terraform v1.15.8
-    linux_amd64
+    on linux_amd64
 
----
+Docker was verified as:
 
-### 17.2 Docker Environment
-
-Verified:
-
-    Docker version 29.7.2
+    Docker 29.7.2
     Docker Engine 29.7.2
 
----
+The Docker provider was successfully initialized:
 
-### 17.3 Provider
-
-The Docker provider was initialized successfully:
-
-    kreuzwerker/docker
+    kreuzwerker/docker v3.9.0
 
 ---
 
-### 17.4 Configuration
+## 52. Configuration Verification
 
-Verified with:
+The Terraform configuration was checked with:
 
     terraform validate
 
@@ -2056,134 +1536,198 @@ Result:
 
     Success! The configuration is valid.
 
+This confirmed that the Terraform configuration could be successfully parsed and validated.
+
 ---
 
-### 17.5 Initial Infrastructure
+## 53. Infrastructure Verification
 
-Terraform successfully created:
+Terraform successfully managed:
 
     docker_image.nginx
+
+and:
+
     docker_container.nginx
 
-Result:
+The Nginx container was successfully created and verified.
 
-    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+Initial port mapping:
+
+    0.0.0.0:8080 -> 80/tcp
+
+After the configuration change:
+
+    0.0.0.0:8081 -> 80/tcp
 
 ---
 
-### 17.6 Application
+## 54. Application Verification
 
-The Nginx container was verified through Docker and HTTP.
+Nginx was tested through HTTP.
 
-Docker showed:
+The initial test returned the Nginx welcome page.
 
-    0.0.0.0:8080->80/tcp
+After changing the port, the new endpoint was tested with:
 
-Later, after the configuration change:
+    curl -I http://localhost:8081
 
-    0.0.0.0:8081->80/tcp
-
-HTTP verification returned:
+The response included:
 
     HTTP/1.1 200 OK
 
-and the Nginx welcome page was returned.
+This verified that the new Terraform-managed infrastructure was functioning correctly.
+
+The old port was tested and no longer served Nginx.
+
+This confirmed that the configuration change had actually taken effect.
 
 ---
 
-### 17.7 Configuration Change
+## 55. State Verification
 
-The external port was changed:
+Terraform state was inspected using:
 
-    8080 → 8081
+    terraform state list
 
-Terraform detected the change and planned a replacement.
+The managed resources were:
 
-The replacement was successfully applied.
+    docker_container.nginx
+    docker_image.nginx
 
-Final infrastructure matched the new desired state.
+The container state showed important values including:
+
+    name = "terraform-nginx"
+    external = 8081
+    internal = 80
+
+This demonstrated that Terraform maintains information about infrastructure resources under its management.
 
 ---
 
-### 17.8 Drift Detection
+## 56. Dependency Verification
 
-A manual infrastructure change was introduced:
+The dependency relationship was inspected through:
+
+    terraform graph
+
+The practical relationship was:
+
+    docker_image.nginx
+            ↓
+    docker_container.nginx
+
+The container depends on the image.
+
+Terraform therefore understands the resource relationship and can determine the appropriate order of operations.
+
+---
+
+## 57. Drift Verification
+
+A manual infrastructure change was intentionally introduced:
 
     docker stop terraform-nginx
 
-Terraform detected the difference through:
+Docker then showed the container as:
 
-    terraform plan
+    Exited (0)
 
-It then restored the desired infrastructure through:
+Terraform was then used to detect the difference.
 
-    terraform apply
+The plan showed:
 
-Final verification returned:
+    Plan: 1 to add, 0 to change, 0 to destroy.
+
+Terraform therefore detected that the desired infrastructure required the container to exist again.
+
+After applying:
+
+    terraform apply -auto-approve
+
+the container returned to:
+
+    STATUS: Up
+
+with:
+
+    0.0.0.0:8081->80/tcp
+
+The final plan returned:
 
     No changes. Your infrastructure matches the configuration.
 
+This verified successful drift detection and reconciliation.
+
 ---
 
-### 17.9 Final Cleanup
+## 58. Terraform Destroy
 
-The lab infrastructure was removed with:
+The lab infrastructure was cleaned up using:
 
     terraform destroy -auto-approve
 
-Result:
+The purpose of `terraform destroy` is to remove infrastructure managed by the current Terraform configuration.
 
-    Destroy complete! Resources: 2 destroyed.
+The configuration files remain available after destroy.
 
-Docker verification showed no remaining `terraform-nginx` container.
-
-Terraform state no longer contained managed resources.
-
----
-
-### 17.10 Final State After Cleanup
-
-The configuration files remain in the Terraform practice directory.
-
-The infrastructure created during the lab was destroyed.
-
-Therefore:
+Conceptually:
 
     Terraform Configuration
-        ↓
-    Still exists
+            ↓
+          remains
 
-    Docker Lab Infrastructure
-        ↓
-    Destroyed
+    Managed Infrastructure
+            ↓
+          removed
 
-The final `terraform plan` correctly proposed creating the two resources again because the configuration still defines them while the actual infrastructure no longer exists.
-
-Result:
-
-    Plan: 2 to add, 0 to change, 0 to destroy.
-
-This is expected after a successful `terraform destroy`.
+This demonstrates that configuration and infrastructure are separate concepts.
 
 ---
 
-## 18. Key Lessons
+## 59. Final Terraform Lifecycle
 
-### 18.1 Infrastructure as Code
+The complete practical lifecycle demonstrated in this step was:
 
-Infrastructure can be described using configuration instead of being created manually.
+    Write Configuration
+            ↓
+    terraform init
+            ↓
+    terraform fmt
+            ↓
+    terraform validate
+            ↓
+    terraform plan
+            ↓
+    terraform apply
+            ↓
+    Verify Infrastructure
+            ↓
+    Change Configuration
+            ↓
+    terraform plan
+            ↓
+    Apply Replacement
+            ↓
+    Detect Manual Drift
+            ↓
+    Reconcile Infrastructure
+            ↓
+    terraform destroy
 
 ---
 
-### 18.2 Terraform Is Declarative
+## 60. Key Lessons
 
-Terraform describes the desired end state.
+### Infrastructure as Code
 
-Terraform determines the required actions to move infrastructure toward that state.
+Infrastructure can be defined using configuration instead of being created manually.
 
----
+### Declarative Model
 
-### 18.3 Provider
+Terraform describes the desired state and determines the actions required to reach that state.
+
+### Provider
 
 A provider connects Terraform to an external platform.
 
@@ -2193,52 +1737,18 @@ In this lab:
         ↓
     Docker Provider
         ↓
-    Docker Engine
+    Docker
 
----
+### Resource
 
-### 18.4 Resource
+A resource represents an infrastructure object managed by Terraform.
 
-Resources represent infrastructure objects managed by Terraform.
-
-The practical resources were:
+The lab used:
 
     docker_image.nginx
     docker_container.nginx
 
----
-
-### 18.5 Plan Before Apply
-
-`terraform plan` provides a preview of infrastructure changes.
-
-`terraform apply` performs those changes.
-
-This separation allows changes to be reviewed before execution.
-
----
-
-### 18.6 State Is Important
-
-Terraform state records information about managed infrastructure.
-
-It allows Terraform to reason about resources and determine what changes are required.
-
----
-
-### 18.7 Dependencies Matter
-
-The container depended on the image:
-
-    docker_image.nginx
-            ↓
-    docker_container.nginx
-
-Terraform detected this relationship through the resource reference.
-
----
-
-### 18.8 Variables Improve Configuration
+### Variables
 
 Variables allow configurable values to be separated from resource definitions.
 
@@ -2246,177 +1756,158 @@ Example:
 
     var.external_port
 
-This made changing the external port from `8080` to `8081` straightforward.
+### Outputs
 
----
+Outputs expose useful information from Terraform.
 
-### 18.9 Outputs Expose Useful Information
-
-Outputs allowed useful resource information to be displayed:
+Example:
 
     container_name = "terraform-nginx"
     container_port = 8081
 
----
+### State
 
-### 18.10 Terraform Detects Drift
+Terraform state records information about managed infrastructure.
 
-A manual change outside Terraform caused infrastructure to differ from the desired configuration.
+Example:
 
-Terraform detected the difference and proposed corrective action.
+    terraform.tfstate
 
-This demonstrated the reconciliation model:
+### Plan
 
-    Desired State
-          ↓
-    Compare with Actual State
-          ↓
-    Difference detected
-          ↓
-    Apply correction
-          ↓
-    Desired State restored
+`terraform plan` previews required infrastructure changes.
 
----
+### Apply
 
-### 18.11 `No Changes` Is an Important Result
+`terraform apply` performs the planned infrastructure changes.
 
-The message:
+### Destroy
 
-    No changes. Your infrastructure matches the configuration.
+`terraform destroy` removes infrastructure managed by Terraform.
 
-means Terraform found no required infrastructure changes.
+### Drift
 
-This is a useful verification result, not an indication that Terraform did nothing useful.
+When infrastructure is changed outside Terraform, the actual state can differ from the desired configuration.
+
+Terraform can detect and reconcile this difference.
 
 ---
 
-### 18.12 Destroy Does Not Delete Configuration
+## 61. Important Differences
 
-`terraform destroy` removes managed infrastructure.
+### Terraform Plan vs Apply
 
-It does not remove the Terraform configuration files.
+| `terraform plan` | `terraform apply` |
+|---|---|
+| Previews changes | Performs changes |
+| Does not create infrastructure | Creates/updates/destroys infrastructure |
+| Used for review | Used for execution |
 
-Therefore after destroy:
+### Configuration vs State
 
-    Configuration exists
-    Infrastructure does not exist
+| Configuration | State |
+|---|---|
+| Defines desired infrastructure | Records managed infrastructure information |
+| `.tf` files | `terraform.tfstate` |
+| User-maintained | Terraform-maintained |
 
-Running `terraform plan` then correctly proposes recreating the defined resources.
+### Desired vs Actual State
+
+| Desired State | Actual State |
+|---|---|
+| What Terraform configuration declares | What exists in infrastructure |
+| Defined by `.tf` files | Exists in Docker/provider |
+| Terraform uses it as the target | Terraform compares against it |
 
 ---
 
-## 19. Final Result
+## 62. Final Result
 
-### Step 26 — Terraform Status
+### Step
+
+    Step 26 — Terraform
+
+### Status
 
     COMPLETE
 
-### Practical Environment
+### Phase
+
+    Phase 2 — Supplementary Lab
+
+### Practice Path
 
     /home/afroza/Projects/devops-supplementary-labs/Step-26-Terraform/
 
-### Documentation
+### Documentation Path
 
     /home/afroza/Projects/devops-learning/Step-26-Terraform/
 
-### Terraform Version
+### Technologies Used
 
     Terraform v1.15.8
-
-### Docker Version
-
     Docker 29.7.2
     Docker Engine 29.7.2
+    kreuzwerker/docker v3.9.0
+    nginx:alpine
 
-### Concepts Practically Covered
+### Practical Concepts Completed
 
     Infrastructure as Code
-    Declarative configuration
+    Declarative Configuration
     Terraform CLI
     Provider
     Resource
     Variables
     Outputs
-    Configuration files
+    Configuration Files
     terraform init
+    terraform fmt
     terraform validate
     terraform plan
     terraform apply
+    terraform output
+    Terraform State
+    Resource Dependencies
+    Resource Replacement
+    Configuration Changes
+    Drift Detection
+    Drift Reconciliation
     terraform destroy
-    Terraform state
-    Dependencies
-    Desired state
-    Actual state
-    Configuration drift
-    Drift detection
-    Reconciliation
-    Resource replacement
-    Verification
+    Infrastructure Verification
     Troubleshooting
-
-### Practical Infrastructure
-
-The lab successfully created and managed:
-
-    nginx:alpine
-    terraform-nginx
-
-The container was successfully exposed through:
-
-    8080 → 80
-
-and later:
-
-    8081 → 80
-
-Nginx was verified through HTTP requests.
-
-The infrastructure was intentionally destroyed at the end of the lab.
-
-### Final Learning Outcome
-
-The complete Terraform lifecycle was practically demonstrated:
-
-    Configuration
-          ↓
-    Initialize
-          ↓
-    Validate
-          ↓
-    Plan
-          ↓
-    Apply
-          ↓
-    Verify
-          ↓
-    Modify
-          ↓
-    Detect Drift
-          ↓
-    Reconcile
-          ↓
-    Destroy
-
-Step 26 established the foundational understanding required before moving to the next orchestration-focused technology:
-
-    Step 26 — Terraform
-            ↓
-    Infrastructure Provisioning
-            ↓
-    Step 27 — Kubernetes
-            ↓
-    Container Orchestration
+    Security Considerations
 
 ---
 
-## Final Status
+## 63. Final Learning Outcome
 
-**Step 26 — Terraform: COMPLETE**
+The core Terraform model is now understood through practical work:
 
-Terraform was learned and practiced as a separate Phase 2 supplementary lab without modifying the main MERN project.
-```
+    Manual Infrastructure
+            ↓
+    Infrastructure as Code
+            ↓
+    Terraform Configuration
+            ↓
+    terraform plan
+            ↓
+    Review Changes
+            ↓
+    terraform apply
+            ↓
+    Infrastructure
+            ↓
+    Verify
+            ↓
+    Detect Changes / Drift
+            ↓
+    Reconcile
+            ↓
+    terraform destroy
 
+Terraform was therefore learned as an infrastructure provisioning and management tool rather than only as a collection of CLI commands.
 
+---
 
-
+# Step 26 — Final Status: COMPLETE
